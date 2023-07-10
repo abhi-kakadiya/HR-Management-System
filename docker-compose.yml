@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:abhi8477@db:5432/HRM
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=abhi8477
+      - POSTGRES_DB=HRM
+    volumes:
+      - db_data:/var/lib/postgresql/data
+volumes:
+  db_data:

@@ -1,0 +1,10 @@
+flask
+sqlalchemy
+flask-sqlalchemy
+flask-smorest
+python-dotenv
+marshmallow
+psycopg2-binary
+passlib
+Flask-JWT-Extended
+alembic
