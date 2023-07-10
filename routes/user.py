@@ -1,5 +1,5 @@
 from database import db
-from flask import make_response, jsonify
+from flask import jsonify
 from flask.views import MethodView
 from models.model import UserModel
 from passlib.hash import pbkdf2_sha256
@@ -20,7 +20,7 @@ class UserRegister(MethodView):
 
         current_user_id = get_jwt_identity()
         if UserModel.query.filter_by(name=user_data["name"], role=user_data["role"]).first():
-            abort(make_response(
+            abort((
                 jsonify(400, message="A user with that username already exists.")))
 
         if UserModel.query.filter_by(id=current_user_id, role="ADMIN").first():
@@ -35,7 +35,7 @@ class UserRegister(MethodView):
             db.session.commit()
             return newUser
         else:
-            abort(make_response(jsonify(code=401, message="Admin access required!")))
+            abort(jsonify(code=401, message="Admin access required!"))
 
 
 
@@ -46,15 +46,14 @@ class UserLogin(MethodView):
     def get(self, user_data):
 
         AuthUser = UserModel.query.filter_by(email=user_data["email"]).first()
-        UserBool = AuthUser and pbkdf2_sha256.verify(
-            user_data["password"], AuthUser.password)
+        UserBool = AuthUser and pbkdf2_sha256.verify(user_data["password"], AuthUser.password)
 
         if UserBool:
             admin_access_token = create_access_token(identity=AuthUser.id)
             return {"admin_access_token": admin_access_token, "token_type": "bearer"}
 
         else:
-            abort(make_response(jsonify(code=401, message="Admin access required!")))
+            abort(jsonify(code=401, message="Admin access required!"))
 
 
 
@@ -72,10 +71,9 @@ class UserApi_UD(MethodView):
             if user:
                 return user
             else:
-                abort(make_response(
-                    jsonify(code=404, message=f"User with id {user_id} not found")))
+                abort(jsonify(code=404, message=f"User with id {user_id} not found"))
         else:
-            abort(make_response(jsonify(code=401, message="Admin access required!")))
+            abort(jsonify(code=401, message="Admin access required!"))
 
 
 
@@ -94,9 +92,9 @@ class UserApi_UD(MethodView):
                 updated_user = UserModel.query.get(user_id)
                 return updated_user
             else:
-                abort(make_response(jsonify(code=404, message=f"User with id {user_id} not found")))
+                abort(jsonify(code=404, message=f"User with id {user_id} not found"))
         else:
-            abort(make_response(jsonify(code=401, message="Admin access required!")))
+            abort(jsonify(code=401, message="Admin access required!"))
 
 
 
@@ -111,7 +109,7 @@ class UserApi_UD(MethodView):
                 user = UserModel.query.filter_by(
                     id=user_id, role="ADMIN").first()
                 if user:
-                    abort(make_response(jsonify(code=400, message="At least one admin must be present")))
+                    abort(jsonify(code=400, message="At least one admin must be present"))
                 else:
                     user = UserModel.query.filter_by(id=user_id).first()
                     db.session.delete(user)
@@ -125,7 +123,7 @@ class UserApi_UD(MethodView):
                     db.session.commit()
                     return {"message": f"User with id {user_id} deleted successfully"}
                 else:
-                    abort(make_response(jsonify(code=404, message=f"User with id {user_id} not found")))
+                    abort(jsonify(code=404, message=f"User with id {user_id} not found"))
 
         else:
-            abort(make_response(jsonify(code=401, message=f"Admin access required!")))
+            abort(jsonify(code=401, message=f"Admin access required!"))

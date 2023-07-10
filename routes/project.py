@@ -16,11 +16,16 @@ class ProjectApi_CR(MethodView):
     @jwt_required()
     @blp.response(200, DisplayProject(many=True))
     def get(self):
-        projects = ProjectModel.query.all()
-        if projects:      
-            return projects
+        current_user_id = get_jwt_identity()
+        if UserModel.query.filter_by(id=current_user_id, role="ADMIN").first():
+            projects = ProjectModel.query.all()
+            if projects:      
+                return projects
+            else:
+                abort(jsonify(code=404, message="No projects found"))
         else:
-            abort(jsonify(code=400, message="No projects found"))
+            abort(jsonify(code=401, message=f"Admin access required!"))
+            
 
     @jwt_required()
     @blp.arguments(CreateProject)
